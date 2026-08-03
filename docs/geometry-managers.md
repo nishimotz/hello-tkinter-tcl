@@ -1297,7 +1297,7 @@ for i in range(num_columns):
 - [Tk packer manual](https://www.tcl.tk/man/tcl8.6/TkCmd/pack.htm)
 - [Tk grid manual](https://www.tcl.tk/man/tcl8.6/TkCmd/grid.htm)
 - [Tk place manual](https://www.tcl.tk/man/tcl8.6/TkCmd/place.htm)
-- [Tkinter 8.5 reference](https://tkdocs.tkdorinet.org/library/)
+- [Tkinter 8.5 reference](https://tkdocs.com/library/)
 
 ---
 
@@ -1339,7 +1339,7 @@ for i in range(num_columns):
 
 ### パフォーマンスヒント
 
-- **place は避ける**: リサイズ時の再計算コストが高い
+- **place は控えめに**: 座標を手動管理するため保守性が低く、ウィジェットサイズや文字列長の変化に弱い
 - **ネストは最小限に**: 深い階層はレイアウト計算を遅くする
 - **columnconfigure/rowconfigure は一度だけ**: 繰り返し呼び出さない
 

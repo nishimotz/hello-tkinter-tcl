@@ -197,7 +197,7 @@ Tcl は引数を文字列として受け取り、必要な時だけ評価する�
 
 ```tcl
 proc unless {cond body} {
-    if {![eval $cond]} {
+    if {![expr $cond]} {
         eval $body
     }
 }
@@ -419,6 +419,7 @@ root.tk.eval('''
 
     proc update_all {} {
         global balls
+        set i 0
         foreach ball $balls {
             lassign $ball id x y r vx vy
             set x [expr {$x + $vx}]
@@ -426,10 +427,12 @@ root.tk.eval('''
             if {$x - $r < 0 || $x + $r > 400} {set vx [expr {-$vx}]}
             if {$y - $r < 0 || $y + $r > 300} {set vy [expr {-$vy}]}
             .c coords $id [expr {$x-$r}] [expr {$y-$r}] [expr {$x+$r}] [expr {$y+$r}]
-            lset ball 1 $x
-            lset ball 2 $y
-            lset ball 4 $vx
-            lset ball 5 $vy
+            # 要素のコピー $ball ではなく元リスト $balls の該当インデックスを直接更新する
+            lset balls $i 1 $x
+            lset balls $i 2 $y
+            lset balls $i 4 $vx
+            lset balls $i 5 $vy
+            incr i
         }
         after 16 update_all
     }
@@ -441,7 +444,7 @@ root.mainloop()
 
 ---
 
-## Part 5: ootcl / list / dict / array 非推奨化（15分）
+## Part 5: ootcl / list / dict / array と dict の使い分け（15分）
 
 ### ootcl とは
 
@@ -489,11 +492,12 @@ puts [dict get $user name]
 
 list は Tcl の中核。dict は Tcl 8.5 から追加された。
 
-### array 非推奨化
+### array と dict の使い分け
 
 - 伝統的な Tcl array は連想配列だが、構文が特殊
 - dict の方が第一級オブジェクトとして扱いやすい
-- 新規コードでは dict を推奨
+- **array は公式に非推奨ではない**（現在も完全にサポートされ、性能面で優れる場面もある）
+- ただし可読性の観点から、新規コードでは dict を推奨
 - array はレガシーや既存コードで遭遇する程度
 
 ```tcl
@@ -531,8 +535,10 @@ Takeaway:
 
 ---
 
-## 参考資料
+## 関連ドキュメント・参考資料
 
+- [Tcl/Tk ジオメトリマネージャー完全ガイド](docs/geometry-managers.md)
+- [Flutter 開発者のための Tcl/Tk 完全ガイド](docs/flutter-guide.md)
 - Tcl Developer Site: https://www.tcl.tk/
 - Python tkinter docs: https://docs.python.org/3/library/tkinter.html
 - Tcl 8.6 OO: https://www.tcl.tk/man/tcl8.6/TclCmd/define.htm
@@ -545,4 +551,4 @@ Takeaway:
 - 中級者には `eval` / `uplevel` / `apply` の遅延評価を強調
 - 実習ではコピペから始めて、最後に1行だけ書き換えさせる
 - 2時間では深くなりすぎない。テイクアウェイ2つを繰り返す
-- array 非推奨化は「レガシーで遭遇したら dict に置き換えられる」と伝える
+- array は非推奨ではないが「レガシーで遭遇したら dict に置き換えられる」と伝える
