@@ -1170,21 +1170,116 @@ root.mainloop()
 
 > ❌ **同一の親ウィジェット内で、複数のジオメトリマネージャーを混在させてはいけません。**
 
-### エラー例
+### 実は「ウィジェット」ではなく「親」が問題
+
+ここで誤解しやすい点があります。**制約の対象は「子ウィジェット」ではなく「親コンテナ」** です。
+
+Tcl/Tk の内部では、**1 つの親コンテナは同時に 1 つのジオメトリマネージャーにしか管理されません**。最初に pack が親を「占有」すると、その親の中では grid は一切使えません（逆も同様）。
+
+実際に `wish` で試したエラーメッセージを見てみましょう：
+
+```tcl
+button .b1 -text "Button 1"
+pack .b1 -side top          ;# 親 "." が pack に占有される
+
+button .b2 -text "Button 2"
+grid .b2 -row 0 -column 0
+# 💥 cannot use geometry manager "grid" inside ".":
+#    pack is already managing its content windows
+```
+
+エラーメッセージの主語に注目してください。**「pack が "." の content windows を管理している」** と言っています。つまり、`.b2` 自身が悪いのではなく、**親である `.` がすでに pack に占有されている**ことが原因です。
+
+### エラー例（Python）
 
 ```python
 frame = ttk.Frame(root)
 
-# pack で配置
+# pack で配置 → frame が pack に占有される
 btn1 = ttk.Button(frame, text="Button 1")
 btn1.pack(side=tk.LEFT)
 
 # grid で配置 → TclError!
 btn2 = ttk.Button(frame, text="Button 2")
-btn2.grid(row=0, column=1)  # 💥 TclError: conflicting geometry managers
+btn2.grid(row=0, column=1)  # 💥 TclError: cannot use geometry manager "grid"
+                            #    inside "frame": pack is already managing its
+                            #    content windows
 ```
 
-### 回避策：コンテナを分ける
+### 単にエラーが出るだけ？それとももっとややこしい？
+
+結論から言うと、**「エラーが即座に発生してスクリプトが止まる」** のが基本です。ただし、いくつか注意すべき点があります。
+
+#### 1. エラーは「呼び出した瞬間」に発生する
+
+エラーは**遅延せず、その場で即座に**発生します。Tcl ではスクリプトの実行がそこで中断され、Python では `TclError` 例外が送出されます。
+
+```python
+btn1.pack(side=tk.LEFT)   # OK
+btn2.grid(row=0, column=0) # ← ここで即座に TclError が発生
+print("ここは実行されない")  # 到達しない
+```
+
+#### 2. エラーは「先に占有したマネージャー」が決める
+
+どちらのマネージャーが先に呼ばれたかで、エラーになる側が変わります。
+
+```python
+# 先に grid を使った場合
+btn1.grid(row=0, column=0)  # OK → frame が grid に占有される
+btn2.pack(side=tk.LEFT)     # 💥 TclError: cannot use geometry manager "pack"
+                            #    inside "frame": grid is already managing its
+                            #    content windows
+```
+
+つまり「pack と grid のどちらが先か」で、エラーになるのは**後から呼ばれた方**です。
+
+#### 3. ウィジェット自体は「乗り換え」できる（ただし親が空いている場合のみ）
+
+実は**同じウィジェットを別のマネージャーで再配置することは可能**です。`pack` した後に `grid` で再配置すると、ウィジェットはマネージャーを乗り換えます。
+
+```tcl
+button .d1 -text "D1"
+pack .d1 -side top
+puts [winfo manager .d1]   ;# → pack
+grid .d1 -row 0 -column 0
+puts [winfo manager .d1]   ;# → grid（乗り換え成功）
+```
+
+ただし、これは**親がまだ別のマネージャーに占有されていない場合に限ります**。親がすでに占有されていると、やはりエラーになります。
+
+#### 4. エラーが「出ない」ケース：コンテナを分けた場合
+
+**親が異なれば混在は問題ありません。** これは正しい使い方です。
+
+```python
+# pack 用コンテナ
+pack_frame = ttk.Frame(root)
+pack_frame.pack(side=tk.TOP)   # pack_frame が pack に占有
+
+# grid 用コンテナ（別の親）
+grid_frame = ttk.Frame(root)
+grid_frame.pack(side=tk.BOTTOM)  # grid_frame が pack に占有
+
+# それぞれの子は別の親なので自由に配置できる
+ttk.Button(pack_frame, text="Button 1").pack(side=tk.LEFT)
+ttk.Label(grid_frame, text="Name:").grid(row=0, column=0)  # OK
+ttk.Entry(grid_frame).grid(row=0, column=1)                # OK
+```
+
+**ポイント**: 制約は「**同じ親**の中」に限られます。親を分ければ、pack と grid を自由に組み合わせられます。
+
+### なぜこの設計になっているのか？
+
+これは Tcl/Tk の設計上の意図です。**1 つの親のレイアウト計算は 1 つのマネージャーに一任する**ことで、以下の利点が得られます：
+
+- **計算の一貫性**: 複数のマネージャーが同じ親の座標を競合して上書きし合うのを防ぐ
+- **予測可能性**: どのマネージャーが親のサイズを決めるかが一意に定まる
+- **実装の単純さ**: 各マネージャーは「自分の管理下のウィジェットだけ」を考慮すればよい
+
+もし混在を許すと、pack が「上から積む」と grid が「セルに置く」で**同じ座標を別々に計算**し、どちらが優先するか曖昧になってしまいます。Tcl/Tk はこれを**設計段階で禁止**することで回避しています。
+
+### 回避策：コンテナを分ける（推奨パターン）
 
 ```python
 # pack 用コンテナ
@@ -1201,6 +1296,17 @@ grid_frame.pack(side=tk.BOTTOM)
 ttk.Label(grid_frame, text="Name:").grid(row=0, column=0)
 ttk.Entry(grid_frame).grid(row=0, column=1)
 ```
+
+### まとめ：混在のルール
+
+| 状況 | 結果 |
+|------|------|
+| 同じ親で pack と grid を混在 | 💥 即座に `TclError`（後から呼んだ方が失敗） |
+| 同じウィジェットを pack → grid で再配置 | ✅ 可能（親が空いている場合のみ） |
+| 親を分けて pack と grid を使う | ✅ 問題なし（推奨） |
+| エラーは遅延する？ | ❌ いいえ、呼び出しの瞬間に発生 |
+
+**実務上の教訓**: 「エラーが出るから直す」のではなく、**「親を分ける」という構造設計**を最初から意識しましょう。エラーはむしろ親切で、**静かにレイアウトが崩れる**よりはるかにデバッグしやすいのです。
 
 ---
 
@@ -1332,9 +1438,10 @@ for i in range(num_columns):
 - [ ] `fill=BOTH` または `sticky=NSEW` を設定しているか？
 - [ ] `columnconfigure(weight=1)` を設定しているか？
 
-**エラー "conflicting geometry managers" が出た場合**:
+**エラー "cannot use geometry manager ... inside ..." が出た場合**:
 
 - [ ] 同一コンテナ内で pack と grid を混在させていないか？
+- [ ] エラーメッセージの主語（親ウィジェット）を確認したか？
 - [ ] 必要に応じてコンテナを分割したか？
 
 ### パフォーマンスヒント
