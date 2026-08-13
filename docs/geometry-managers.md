@@ -10,6 +10,14 @@ Tcl/Tk（および Python の Tkinter）で GUI アプリケーションを開�
 
 この記事では、3 つのジオメトリマネージャー（pack, grid, place）の特性を整理し、実戦で使える知識を提供します。
 
+> **インタラクティブデモ**: このリポジトリには、各マネージャーの挙動を
+> 実際に触って確認できる playground スクリプトが含まれています。
+> - `pack_playground_tk.py` — pack の全オプションを試せる
+> - `pack_side_playground_tk.py` — 3 つのボタンで pack の side の挙動を確認
+> - `grid_playground_tk.py` — grid の row/column/span/sticky を試せる
+>
+> いずれも `python <filename>.py` で実行できます。
+
 **想定読者**: HTML/CSS の基礎知識がある方（`div`, `flexbox`, `grid` といった用語を知っているレベル）
 
 ---
@@ -152,6 +160,10 @@ button .toolbar.button2 -text "Button 2"
 ---
 
 ## pack：最もシンプルなマネージャー
+
+> 💡 **実際に触ってみる**: `pack_playground_tk.py` と
+> `pack_side_playground_tk.py` で、pack の全オプションを
+> インタラクティブに試せます。`python pack_playground_tk.py` で起動。
 
 ### 基本構文
 
@@ -575,12 +587,64 @@ btn_save.pack(side=tk.LEFT, padx=2)
 ### pack のデメリット
 
 - ❌ 複雑な表形式レイアウトには不向き
-- ❌ 後から特定の位置に挿入するのが困難
 - ❌ 行またぎの配置ができない
+
+### before / after：挿入位置の制御
+
+通常、pack は呼び出した順に末尾へ追加されますが、`before` / `after`
+オプションを使うと**既存の兄弟ウィジェットの間に割り込ませる**ことができます。
+
+```python
+# 通常の pack（末尾に追加）
+widget3.pack(side=tk.TOP)
+
+# widget2 の直前に割り込ませる
+widget3.pack(side=tk.TOP, before=widget2)
+
+# widget1 の直後に割り込ませる
+widget3.pack(side=tk.TOP, after=widget1)
+```
+
+```
+初期状態（pack 順: A → B → C）
+┌─────────┐
+│    A    │  ← 最初に pack
+│    B    │
+│    C    │  ← 最後に pack
+└─────────┘
+
+widget D を pack(after=A) した場合
+┌─────────┐
+│    A    │
+│    D    │  ← A の直後に割り込んだ
+│    B    │
+│    C    │
+└─────────┘
+```
+
+**実用例**: 動的に追加される UI（チャットのメッセージリスト、ログ表示など）
+で、最新メッセージを一番上に挿入したい場合：
+
+```python
+# 新しいメッセージを常に一番上に表示
+first = frame.winfo_children()[0] if frame.winfo_children() else None
+if first:
+    new_msg.pack(side=tk.TOP, fill=tk.X, before=first)
+else:
+    new_msg.pack(side=tk.TOP, fill=tk.X)
+```
+
+> **注意**: `before` / `after` に指定するウィジェットは、
+> **同じ親を持つ兄弟ウィジェット**でなければなりません。
+> 異なる親のウィジェットを指定すると `TclError` になります。
 
 ---
 
 ## grid：表形式レイアウトの決定版
+
+> 💡 **実際に触ってみる**: `grid_playground_tk.py` で、row/column/
+> sticky/columnspan/rowspan をインタラクティブに試せます。
+> `python grid_playground_tk.py` で起動。
 
 **HTML/CSS での対応**: `display: grid`
 
