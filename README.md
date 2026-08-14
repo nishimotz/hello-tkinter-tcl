@@ -538,6 +538,7 @@ Takeaway:
 ## 関連ドキュメント・参考資料
 
 - [Tcl/Tk における画像の使い方完全ガイド](docs/image-handling-guide.md)
+  - デモ: [`image_playground.py`](image_playground.py) — Label/Button/Canvas/Resize/Transparent/SVG を対話的に試せます
 - [Python bundled Tcl/Tk version history and tkinter feature changes](docs/python-tkinter-tcltk-version-history.md)
 - [Tcl/Tk ジオメトリマネージャー完全ガイド](docs/geometry-managers.md)
 - [Flutter 開発者のための Tcl/Tk 完全ガイド](docs/flutter-guide.md)
