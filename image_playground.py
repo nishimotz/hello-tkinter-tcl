@@ -286,7 +286,7 @@ class ImagePlayground(tk.Tk):
         if can_load_svg:
             try:
                 svg_img = tk.PhotoImage(file=SVG_PATH)
-                svg_img = svg_img.subsample(2, 2)
+                svg_img = svg_img.subsample(3, 3)
                 self._keep_ref("svg", svg_img)
                 ttk.Label(frame, image=svg_img).pack(pady=20)
             except tk.TclError as e:
