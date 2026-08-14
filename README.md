@@ -537,6 +537,8 @@ Takeaway:
 
 ## 関連ドキュメント・参考資料
 
+- [Tcl/Tk における画像の使い方完全ガイド](docs/image-handling-guide.md)
+- [Python bundled Tcl/Tk version history and tkinter feature changes](docs/python-tkinter-tcltk-version-history.md)
 - [Tcl/Tk ジオメトリマネージャー完全ガイド](docs/geometry-managers.md)
 - [Flutter 開発者のための Tcl/Tk 完全ガイド](docs/flutter-guide.md)
 - Tcl Developer Site: https://www.tcl.tk/
