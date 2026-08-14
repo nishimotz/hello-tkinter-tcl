@@ -3,6 +3,9 @@ name = "hello-tkinter-tcl"
 version = "0.1.0"
 description = "Tcl/Tk and tkinter learning playground"
 requires-python = ">=3.14.6"
+dependencies = [
+    "pillow>=12.3.0",
+]
 
 [project.optional-dependencies]
 pillow = ["pillow>=11.0"]
