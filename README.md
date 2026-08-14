@@ -535,6 +535,29 @@ Takeaway:
 
 ---
 
+## 使い方（uv の場合）
+
+このリポジトリは Python 3.14.6 以降を想定しています。Homebrew 版 Python 3.14.6 には Tcl/Tk 9.0.4 が同梱されています。
+
+```bash
+uv run -- python -V              # Python 3.14.6
+uv run -- python image_playground.py
+uv run -- python pack_playground_tk.py
+uv run -- python grid_playground_tk.py
+uv run -- python pack_side_playground_tk.py
+```
+
+`pyproject.toml` と `.python-version` で `>=3.14.6` / `3.14.6` を固定しています。
+これにより、`uv run` が誤って Tcl/Tk 8.6 を同梱した Python 3.13 や uv 管理の 3.14.0 を選択するのを防ぎます。
+
+Pillow を使いたい場合:
+
+```bash
+uv run --extra pillow -- python image_playground.py
+```
+
+---
+
 ## 関連ドキュメント・参考資料
 
 - [Tcl/Tk における画像の使い方完全ガイド](docs/image-handling-guide.md)
