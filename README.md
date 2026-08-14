@@ -550,16 +550,19 @@ uv run -- python pack_side_playground_tk.py
 `pyproject.toml` と `.python-version` で `>=3.14.6` / `3.14.6` を固定しています。
 これにより、`uv run` が誤って Tcl/Tk 8.6 を同梱した Python 3.13 や uv 管理の 3.14.0 を選択するのを防ぎます。
 
-Pillow を使いたい場合:
+Pillow や Matplotlib を使いたい場合:
 
 ```bash
 uv run --extra pillow -- python image_playground.py
+uv run --extra matplotlib -- python matplotlib_tk_playground.py
 ```
 
 ---
 
 ## 関連ドキュメント・参考資料
 
+- [Tkinter と Matplotlib 連携完全ガイド](docs/matplotlib-integration-guide.md)
+  - デモ: [`matplotlib_tk_playground.py`](matplotlib_tk_playground.py) — 信号波形・周波数・ノイズを GUI で対話的にプロット・更新
 - [Tcl/Tk における画像の使い方完全ガイド](docs/image-handling-guide.md)
   - デモ: [`image_playground.py`](image_playground.py) — Label/Button/Canvas/Resize/Transparent/SVG を対話的に試せます
 - [Python bundled Tcl/Tk version history and tkinter feature changes](docs/python-tkinter-tcltk-version-history.md)
