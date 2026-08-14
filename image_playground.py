@@ -103,6 +103,18 @@ class ImagePlayground(tk.Tk):
         notebook.add(self._tab_transparent(), text="Transparent")
         notebook.add(self._tab_svg(), text="SVG")
 
+        # タブ切り替え時の macOS/Tk 描画アーティファクトを抑制
+        notebook.bind("<<NotebookTabChanged>>", self._on_tab_changed)
+
+    def _on_tab_changed(self, event=None):
+        """タブ切り替え時に再描画を強制し、macOS/Tk の黒い線アーティファクトを抑制する。"""
+        self.update_idletasks()
+        # 全 Canvas を再描画
+        for widget in self.winfo_children():
+            for child in widget.winfo_children():
+                if isinstance(child, tk.Canvas):
+                    child.update_idletasks()
+
     def _keep_ref(self, name, img):
         """PhotoImage オブジェクトをガベージコレクトされないように保持。"""
         self.images[name] = img
