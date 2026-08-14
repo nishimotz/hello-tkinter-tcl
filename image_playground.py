@@ -229,26 +229,43 @@ class ImagePlayground(tk.Tk):
 
         desc = ttk.Label(
             frame,
-            text="透過 PNG を様々な背景色の上に表示。透過部分は親ウィジェットの背景を透かして見えます。",
+            text="透過 PNG を市松模様の背景の上に表示。透過部分は下の柄が透けて見えます。",
             wraplength=600,
         )
         desc.pack(pady=10)
 
-        colors = ["white", "lightblue", "lightgreen", "salmon"]
+        # 各パネルの（背景色1, 背景色2, ラベル）
+        configs = [
+            ("lightgray", "white", "white"),
+            ("lightblue", "white", "lightblue"),
+            ("lightgreen", "white", "lightgreen"),
+            ("salmon", "white", "salmon"),
+        ]
         container = ttk.Frame(frame)
         container.pack(pady=10)
 
-        for i, color in enumerate(colors):
-            sub = tk.Frame(container, bg=color, width=160, height=160)
+        size = 180
+        cell = 20
+        for color1, color2, name in configs:
+            sub = ttk.Frame(container)
             sub.pack(side=tk.LEFT, padx=10)
-            sub.pack_propagate(False)
 
+            ttk.Label(sub, text=name).pack()
+
+            canvas = tk.Canvas(sub, width=size, height=size, bg=color1)
+            canvas.pack()
+
+            # 市松模様を描画
+            for y in range(0, size, cell):
+                for x in range(0, size, cell):
+                    fill = color1 if ((x // cell + y // cell) % 2 == 0) else color2
+                    canvas.create_rectangle(x, y, x + cell, y + cell, outline="", fill=fill)
+
+            # 画像を Canvas 中央に重ねる
             img = tk.PhotoImage(file=PNG_PATH)
-            img = img.subsample(4, 4)
-            self._keep_ref(f"trans_{color}", img)
-
-            lbl = tk.Label(sub, image=img, bg=color)
-            lbl.pack(expand=True)
+            img = img.subsample(8, 8)
+            self._keep_ref(f"trans_{name}", img)
+            canvas.create_image(size // 2, size // 2, image=img, anchor=tk.CENTER)
 
         return frame
 
