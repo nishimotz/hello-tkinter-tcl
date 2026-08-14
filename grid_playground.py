@@ -9,7 +9,7 @@ controlled by those options.
 Uses only ``tk`` widgets (no ``ttk``) so the demo stays visually consistent
 regardless of the platform theme.
 
-Run with:  python grid_playground_tk.py
+Run with:  python grid_playground.py
 """
 
 from __future__ import annotations

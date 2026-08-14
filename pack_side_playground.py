@@ -6,7 +6,7 @@ how pack consumes the available space one widget at a time: every time a
 button is packed, the remaining area shrinks and the next options are applied
 to that *remaining* area.
 
-Run with:  python pack_side_playground_tk.py
+Run with:  python pack_side_playground.py
 """
 
 from __future__ import annotations

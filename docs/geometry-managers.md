@@ -12,9 +12,9 @@ Tcl/Tk（および Python の Tkinter）で GUI アプリケーションを開�
 
 > **インタラクティブデモ**: このリポジトリには、各マネージャーの挙動を
 > 実際に触って確認できる playground スクリプトが含まれています。
-> - `pack_playground_tk.py` — pack の全オプションを試せる
-> - `pack_side_playground_tk.py` — 3 つのボタンで pack の side の挙動を確認
-> - `grid_playground_tk.py` — grid の row/column/span/sticky を試せる
+> - `pack_playground.py` — pack の全オプションを試せる
+> - `pack_side_playground.py` — 3 つのボタンで pack の side の挙動を確認
+> - `grid_playground.py` — grid の row/column/span/sticky を試せる
 >
 > いずれも `python <filename>.py` で実行できます。
 
@@ -161,9 +161,9 @@ button .toolbar.button2 -text "Button 2"
 
 ## pack：最もシンプルなマネージャー
 
-> 💡 **実際に触ってみる**: `pack_playground_tk.py` と
-> `pack_side_playground_tk.py` で、pack の全オプションを
-> インタラクティブに試せます。`python pack_playground_tk.py` で起動。
+> 💡 **実際に触ってみる**: `pack_playground.py` と
+> `pack_side_playground.py` で、pack の全オプションを
+> インタラクティブに試せます。`python pack_playground.py` で起動。
 
 ### 基本構文
 
@@ -642,9 +642,9 @@ else:
 
 ## grid：表形式レイアウトの決定版
 
-> 💡 **実際に触ってみる**: `grid_playground_tk.py` で、row/column/
+> 💡 **実際に触ってみる**: `grid_playground.py` で、row/column/
 > sticky/columnspan/rowspan をインタラクティブに試せます。
-> `python grid_playground_tk.py` で起動。
+> `python grid_playground.py` で起動。
 
 **HTML/CSS での対応**: `display: grid`
 
