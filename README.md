@@ -564,6 +564,7 @@ uv run --extra pandastable -- python pandastable_playground.py
 
 - [Tkinter と Python 定番ライブラリの連携ガイド](docs/popular-libraries-integration-guide.md)
   - 定番ライブラリ（Matplotlib, Pillow, pandastable, OpenCV, python-vlc 等）との連携まとめ
+  - デモ: [`pandastable_playground.py`](pandastable_playground.py) — Pandas DataFrame の表表示・操作デモ
 - [Tkinter と Matplotlib 連携完全ガイド](docs/matplotlib-integration-guide.md)
   - デモ: [`matplotlib_tk_playground.py`](matplotlib_tk_playground.py) — 信号波形・周波数・ノイズを GUI で対話的にプロット・更新
 - [Tcl/Tk における画像の使い方完全ガイド](docs/image-handling-guide.md)
