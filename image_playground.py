@@ -142,7 +142,7 @@ class ImagePlayground(tk.Tk):
         desc.pack(pady=10)
 
         img = self._keep_ref("button", self._load_png(scale=4))
-        btn = ttk.Button(
+        btn = tk.Button(
             frame,
             image=img,
             text="Click me!",
