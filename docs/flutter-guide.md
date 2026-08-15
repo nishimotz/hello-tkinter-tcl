@@ -8,8 +8,9 @@ Flutter でモバイルや Desktop / Web アプリを作っている開発者が
 
 - **ウィジェットを中心とした設計**（Everything is a Widget 思想と類似）
 - **階層的なツリー構造**（Widget Tree）
-- **柔軟なレイアウト交渉モデル**（Constraints & Negotiation）
 - **標準搭載のベクターキャンバス機能**（CustomPaint / Canvas 相当）
+
+一方で、レイアウトは外観が似ている一方で**計算モデルが本質的に異なる**ため、Flutter の感覚で Tk を扱うと意外な落とし穴があります。
 
 しかし同時に、**Flutter の常識でコーディングすると必ず激突する「Tk 特有の弱点・ハマりどころ（Pitfalls）」** も存在します。
 
@@ -81,45 +82,101 @@ Flutter では Widget オブジェクトの入れ子構造でツリーを形成�
 
 ## 3. レイアウト概念の完全対応表
 
-Flutter のレイアウト用 Widget と Tk のジオメトリマネージャー (`pack`, `grid`, `place`) は 1 対 1 に近い形で対応します。
+Flutter のレイアウト用 Widget と Tk のジオメトリマネージャー (`pack`, `grid`, `place`) は**外観が似ていることが多い**ですが、内部の計算モデルは別物です。以下はあくまで「見た目の対応」であり、`pack` は順序に強く依存し、Flutter の Flex は制約で一括計算するという本質的な違いがあります（詳細は次節）。
 
-### レイアウトマネージャーの比較
+### レイアウトマネージャーの比較（外観対応）
 
 | Flutter Widget | Tcl/Tk 機能 | 概要・ポイント |
 | :--- | :--- | :--- |
-| `Column` | `pack -side top` | 縦方向に順次要素を詰める |
-| `Row` | `pack -side left` | 横方向に順次要素を詰める |
+| `Column` | `pack -side top` | 縦方向に順次要素を詰める。ただし `pack` は cavity を削るので配置順序が結果に影響する |
+| `Row` | `pack -side left` | 横方向に順次要素を詰める。同上、順序依存 |
 | `Stack` + `Positioned` | `place` | 絶対座標 (`x`, `y`) や相対座標 (`relx`, `rely`) で重なり配置 |
 | `GridView` / `Table` | `grid` | 行 (`row`) と列 (`column`) の 2 次元格子配置 |
 | `Padding` | `-padx`, `-pady` | 外側パディング（周囲の余白） |
 | `Container` (margin/padding) | `-ipadx`, `-ipady` | 内側パディング（内部要素と枠の余白） |
 | `Align` / `Center` | `-anchor` / `-sticky` | 割り当て領域内での寄せる方向 (`n`, `s`, `e`, `w`, `center` 等) |
-| `Expanded` / `Flexible` | `pack -fill -expand` / `grid configure -weight` | 余剰スペースの自動伸縮指定 |
+| `Expanded` / `Flexible` | `pack -fill -expand` / `grid configure -weight` | 余剰スペースの自動伸縮指定。`Expanded` は flex factor で分配、`pack -expand` は cavity への埋め込み |
 | `SizedBox` / `Container` | `frame` / `-width` `-height` | サイズ固定の領域や背景枠 |
 
 ---
 
 ## 4. Layout Negotiation（サイズ決定メカニズム）
 
-Flutter の有名な原則に **"Constraints go down. Sizes go up. Parent sets position."** （制約は下へ、サイズは上へ、親が位置を決める）というレイアウト規則があります。
+Flutter と Tcl/Tk はどちらも「親が子に空間を割り当てる」という大きな流れは似ていますが、**計算モデルは本質的に異なります**。
 
-Tcl/Tk でも全く同じ **ジオメトリ交渉 (Geometry Negotiation)** というメカニズムが動いています。
+### Flutter: Constraint-based（制約ベース）
+
+Flutter の有名な原則に **"Constraints go down. Sizes go up. Parent sets position."** （制約は下へ、サイズは上へ、親が位置を決める）があります。
 
 ```
-[Flutter]                                [Tcl/Tk]
-Parent Constraints (min/max W, H)  ===>  Parent Constraints / Geometry Manager
-               │                                      │
-               ▼                                      ▼
-Child calculates Size              <===  Child Requested Size (reqwidth / reqheight)
-               │                                      │
-               ▼                                      ▼
-Parent sets Position               ===>  Parent places Child (pack / grid / place)
+Parent                  親: BoxConstraints (min/max W, H) を子へ渡す
+   │
+   ▼
+Child                   子: 制約を受け取り、希望サイズを返す
+   │
+   ▼
+Parent                  親: 子のサイズと位置を決定
 ```
 
-1. **子ウィジェットが希望サイズを計算**:
-   - Tcl/Tk では、各ウィジェットがテキスト長やフォントから自身の要求サイズ（`reqwidth`, `reqheight`）を計算します。
-2. **親（ジオメトリマネージャー）が最終配置とサイズを調整**:
-   - `pack` や `grid` が親のウィンドウサイズと子の要求サイズを比較し、`-expand` や `-weight`（Flutter の `flex` に相当）の設定に基づいて各ウィジェットに空間を割り当てます。
+Flutter の `Row` / `Column`（Flex）は、親が全子に制約を一括で渡し、各子がサイズを返した後で親が** flex factor（`Expanded` / `Flexible`）に基づいて余剰スペースを再分配**します。これは宣言的で、配置順序が結果に直接影響することはありません。
+
+### Tcl/Tk pack: Cavity モデル（逐次的・副作用的）
+
+`pack` は「親のウィンドウ内部に残っている矩形領域 = cavity（空洞）」を、各子ウィジェットが順に削り取っていくモデルです。
+
+```
++------------------+     親ウィンドウの cavity
+|                  |
+|                  |
+|                  |
+|                  |
++------------------+
+
+pack .a -side top    → 上辺から .a の高さだけ cavity を削る
++---[ widget .a ]--+
+|                  |
+|   残り cavity    |
+|                  |
++------------------+
+
+pack .b -side left   → 残り cavity の左辺から .b の幅だけ削る
++---[ widget .a ]--+
+|[ .b]  残り cavity|
+|                  |
++------------------+
+
+pack .c -side right -expand 1 -fill both
+                      → 最後の子が残り cavity を占有
++---[ widget .a ]--+
+|[ .b] [  .c      ]|
+|      [  expands ]|
++------------------+
+```
+
+重要なポイント:
+
+1. **順序が結果を変える**
+   - `pack .a -side top` から始めた場合と、`pack .b -side left` から始めた場合では、最終的な配置・サイズが異なります。
+   - Flutter の `Row` / `Column` では、子の順序は視覚的順序を決めるだけで、サイズ計算の結果には原則として影響しません。
+
+2. **cavity を削る副作用的モデル**
+   - `pack` は各配置ステップで cavity の形状を変化させます。
+   - `-expand 1 -fill both` を指定すると、残った cavity を埋めるように伸びます。
+   - これは Flutter の `Expanded` に**外見は似ていますが**、内部では flex factor を使った分配ではなく、「残りを全部埋める」あるいは「複数 expand 指定時は均等に分配する」という cavity ベースの振る舞いです。
+
+3. **同一親内で pack と grid を混ぜられない**
+   - cavity モデルは `pack` 専用です。`grid` は全く別の配置マネージャーで、同じ親フレーム内では共存できません。
+
+### 比較まとめ
+
+| 項目 | Flutter `Row` / `Column` | Tk `pack` |
+| :--- | :--- | :--- |
+| **計算モデル** | Constraint-based、一括計算 | Cavity ベース、逐次処理 |
+| **配置指定** | 宣言的（`Row` / `Column` + `Expanded`） | `side` + 順番に強く依存 |
+| **柔軟性** | `Expanded` / `Flexible` で制御しやすい | 混ぜると予測しにくい |
+| **レイアウト計算** | ツリー全体の制約伝播 | 子を順に cavity に配置 |
+
+したがって、Flutter の `Expanded` と `pack -expand 1 -fill both` は「余剰スペースを埋める」という外観は似ていますが、**Flutter には cavity モデルそのものは存在しません**。Flutter 経験者が `pack` を使う場合は、制約ベースの直感ではなく「順番で残り領域を削っていく」というモデルで考える必要があります。
 
 ---
 
@@ -340,15 +397,16 @@ pack .lbl .btn
 
 ## まとめ
 
-Flutter 開発者が Tcl/Tk を触る際、以下の変換テーブルと注意点を頭に入れておくと非常にスムーズです。
+Flutter 開発者が Tcl/Tk を触る際、以下の変換テーブルと注意点を頭に入れておくと、外観の似ている部分で最初はスムーズに進めます。
 
 1. **ツリー構造**: Widget Tree ＝ パス名ツリー (`.frame.button`)
-2. **Column / Row**: `pack -side top / left`
-3. **Expanded**: `pack -expand 1 -fill both` または `grid configure -weight 1`
+2. **Column / Row**: `pack -side top / left` に外見は似ているが、`pack` は **cavity を削る副作用的モデル** であり、配置順序が結果に強く影響する
+3. **Expanded**: `pack -expand 1 -fill both` や `grid configure -weight 1` に外見は似ているが、Flutter の `Expanded` は flex factor による一括分配、`pack` は残り cavity を埋めるモデル
 4. **Stack / Positioned**: `place -x ... -y ...`
 5. **注意点**:
    - 同一 Frame で `pack` と `grid` を絶対に混ぜない
    - Frame の固定サイズには `pack propagate .f 0` が必要
    - 時間のかかる処理で UI スレッドをブロックしない
+   - `pack` を使う時は Flutter の制約ベース直感ではなく、**「cavity を順に削っていく」** というモデルで考える
 
-Tcl/Tk は非常に軽量で、Flutter と通底する直感的なレイアウト＆ウィジェットモデルを持っています。落とし穴を回避しつつ、軽量なデスクトップツールや爆速プロトタイピングに活用してみてください！
+Tcl/Tk は非常に軽量で、ウィジェット階層や Canvas の概念は Flutter と見た目が通底しますが、レイアウトモデルはかなり異なります。特に `pack` の cavity モデルは Flutter にはないため、直接的な対応として扱うと予測を外しやすいです。落とし穴を理解した上で、軽量なデスクトップツールや爆速プロトタイピングに活用してみてください！
