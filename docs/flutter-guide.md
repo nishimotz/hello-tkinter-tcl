@@ -122,7 +122,7 @@ Flutter の `Row` / `Column`（Flex）は、親が全子に制約を一括で渡
 
 ### Tcl/Tk pack: Cavity モデル（逐次的・副作用的）
 
-`pack` のレイアウト計算は **2段階** で行われます。
+`pack` のレイアウト計算は **2段階** で行われます。本家ソース `generic/tkPack.c` の `ArrangePacking` 関数、および `XExpansion` / `YExpansion` 関数で実装を確認できます。
 
 #### 段階 1: 基本サイズの割り当て（逐次）
 
@@ -195,6 +195,37 @@ pack .b -side left   → 残り cavity の左辺から .b の幅だけ削る
 | **レイアウト計算** | ツリー全体の制約伝播 | 子を順に cavity に配置 |
 
 したがって、Flutter の `Expanded` と `pack -expand 1 -fill both` は「余剰スペースを埋める」という外観は似ていますが、**Flutter には cavity モデルそのものは存在しません**。Flutter 経験者が `pack` を使う場合は、制約ベースの直感ではなく「**基本配置は逐次、余白分配は一括均等**」というモデルで考える必要があります。
+
+---
+
+### Tcl/Tk grid: 座標ベース・宣言的
+
+`grid` は `pack` とは別のジオメトリマネージャーです。本家ソース `generic/tkGrid.c` では、grid の子ウィジェットリストについて **"List order doesn't matter"** とコメントされており、配置は明示的な `row` / `column` 座標で決まります。
+
+| 項目 | `pack` | `grid` |
+| :--- | :--- | :--- |
+| **配置方式** | packing list 順に cavity を削る | `row` / `column` 座標で配置 |
+| **順序依存** | 強い | なし（順不同） |
+| **次元** | 1次元（`side` ベース） | 2次元（行・列） |
+| **余白分配** | `-expand` で均等配分 | `-weight` で比例配分 |
+| **宣言性** | 低い（副作用的） | 高い（座標指定） |
+
+### Flutter との対応
+
+- **`Row` / `Column` + `Expanded(flex: N)`** は、概念として `grid` の `rowconfigure` / `columnconfigure` `-weight` に近いです。
+  - `Expanded(flex: 2)` は余剰スペースを 2:1 に配分
+  - `grid columnconfigure .f 0 -weight 2; grid columnconfigure .f 1 -weight 1` も同様に 2:1 に配分
+- ただし `grid` は2次元なので、行方向と列方向の `weight` は独立して指定します。
+- `pack` には個別の重みがないため、`Expanded(flex: 2)` のような2:1配分は直接表現できません。`grid` を使うか、複数の `expand=True` 子を組み合わせる工夫が必要です。
+
+### なぜ `pack` と `grid` を混ぜられないのか
+
+同一の親フレーム内で `pack` と `grid` を混ぜるとエラーになる理由は、両者のデータ構造と計算モデルが全く異なるためです。
+
+- `pack`: priority-ordered list で子を管理し、cavity を削っていく
+- `grid`: row/column 座標で子を管理し、slot ベースで計算
+
+これらは同じウィンドウに対して同時に適用できないため、異なるマネージャーを使いたい場合は新しい `frame` で分離する必要があります。
 
 ---
 
