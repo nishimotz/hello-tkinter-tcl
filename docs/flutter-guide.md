@@ -194,7 +194,7 @@ pack .b -side left   → 残り cavity の左辺から .b の幅だけ削る
 | **柔軟性** | `Expanded` / `Flexible` で制御しやすい | 混ぜると予測しにくい |
 | **レイアウト計算** | ツリー全体の制約伝播 | 子を順に cavity に配置 |
 
-したがって、Flutter の `Expanded` と `pack -expand 1 -fill both` は「余剰スペースを埋める」という外観は似ていますが、**Flutter には cavity モデルそのものは存在しません**。Flutter 経験者が `pack` を使う場合は、制約ベースの直感ではなく「順番で残り領域を削っていく」というモデルで考える必要があります。
+したがって、Flutter の `Expanded` と `pack -expand 1 -fill both` は「余剰スペースを埋める」という外観は似ていますが、**Flutter には cavity モデルそのものは存在しません**。Flutter 経験者が `pack` を使う場合は、制約ベースの直感ではなく「**基本配置は逐次、余白分配は一括均等**」というモデルで考える必要があります。
 
 ---
 
