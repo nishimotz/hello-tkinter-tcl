@@ -160,16 +160,24 @@ class ImagePlayground(tk.Tk):
         desc.pack(pady=10)
 
         img = self._keep_ref("button", self._load_png(scale=4))
+        feedback = ttk.Label(frame, text="ボタンをクリックしてください", foreground="#666666")
+        feedback.pack(pady=(0, 20))
+
         btn = tk.Button(
             frame,
             image=img,
             text="Click me!",
             compound=tk.BOTTOM,
-            command=lambda: print("Button clicked!"),
+            command=lambda: self._on_button_clicked(feedback),
         )
         btn.pack(pady=20)
 
         return frame
+
+    def _on_button_clicked(self, label):
+        """画像付きボタンが押されたときの可視フィードバック。"""
+        print("Button clicked!")
+        label.config(text="✅ クリックされました！", foreground="#2e7d32")
 
     def _tab_canvas(self):
         frame = ttk.Frame(self)
