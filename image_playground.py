@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
+# /// script
+# dependencies = [
+#     "pillow>=12.3.0",
+# ]
+# ///
+
 """
 image_playground.py
 
-「Tcl/Tk における画像の使い方完全ガイド」のデモアプリ。
+「Tcl/Tk における画像の使い方ガイド」のデモアプリ。
 
 以下の画像表示パターンを体験できます：
 - Label 表示（静的アイコン）

@@ -1,3 +1,10 @@
+# /// script
+# dependencies = [
+#     "matplotlib>=3.10",
+#     "numpy>=2.0",
+# ]
+# ///
+
 """Interactive Matplotlib & Tkinter Integration Playground.
 
 Demonstrates how to embed Matplotlib plots into a Tkinter GUI application using

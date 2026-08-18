@@ -1,4 +1,4 @@
-# Tkinter と Matplotlib 連携完全ガイド
+# Tkinter と Matplotlib 連携ガイド
 
 ## はじめに
 

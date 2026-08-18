@@ -1,4 +1,4 @@
-# Flutter 開発者のための Tcl/Tk (tkinter) 完全ガイド
+# Flutter 開発者のための Tcl/Tk (tkinter) ガイド
 
 ## はじめに
 

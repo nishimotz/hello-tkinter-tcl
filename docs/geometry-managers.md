@@ -1,4 +1,4 @@
-# Tcl/Tk ジオメトリマネージャー完全ガイド
+# Tcl/Tk ジオメトリマネージャーガイド
 
 ## はじめに
 
@@ -1433,6 +1433,26 @@ widget.grid(row=0, column=0, sticky=tk.NSEW)
 for i in range(num_columns):
     frame.columnconfigure(i, weight=1)
 ```
+
+### macOS で背景色（bg）が効かない
+
+**ハマりどころ:** macOS の Tk は **Aqua テーマ**でウィジェットをネイティブ描画するため、一部の `tk` ウィジェットで `bg` 色が**完全に無視**されます。
+
+- **`tk.Button`**: `bg` が無視される（常に macOS 標準のグレーで描画）
+- **`ttk.Button`**: 同様に `background` が無視される（Aqua テーマはネイティブ描画）
+- **`tk.Label`**: `bg` が**尊重される**（色が表示される）
+- **`tk.Frame`**: `bg` が尊重される
+
+**対処法:**
+
+1. **色付きウィジェットが必要な場合は `tk.Label` を使う**（`bg` が尊重される）。`ipadx`/`ipady` などの内部パディングを色で可視化するデモでは、`tk.Button` の代わりに `tk.Label` をターゲットにすると意図通りに表示される。
+2. **ネイティブな見た目が目的なら `ttk` を使う**。ただし `ttk` の色制御は `ttk.Style().configure()` 経由で行い、Aqua テーマではボタンの背景色はやはりネイティブ描画に上書きされる点に注意。
+3. **クロスプラットフォームで色を確実に出すには**、`tk.Label` や `tk.Frame` など `bg` を尊重するウィジェットを選ぶ。
+
+> 📖 **詳細はこちら**: テーマとスタイルの仕組み、`style.configure` と
+> `style.map` の使い分け、プラットフォーム別の制約、テーマ切り替えの実装は
+> **[テーマとスタイルガイド](./theming-guide.md)** を参照してください。
+> 実際に触って確認できる `theme_playground.py` も紹介しています。
 
 ---
 

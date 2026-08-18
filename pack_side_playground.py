@@ -1,9 +1,13 @@
-"""Interactive pack options playground (pure tkinter, 3 buttons).
+# /// script
+# dependencies = []
+# ///
 
-Three buttons are packed into a frame in order.  Each button has its own
+"""Interactive pack options playground (pure tkinter, 3 labels).
+
+Three labels are packed into a frame in order.  Each label has its own
 ``side``, ``fill``, ``expand`` and ``anchor`` option menus, so you can watch
 how pack consumes the available space one widget at a time: every time a
-button is packed, the remaining area shrinks and the next options are applied
+label is packed, the remaining area shrinks and the next options are applied
 to that *remaining* area.
 
 Run with:  python pack_side_playground.py
@@ -29,16 +33,16 @@ ANCHOR_VALUES = [
 options: list[dict[str, str]] = [
     {"side": "top", "fill": "none", "expand": "False", "anchor": "center"},
     {"side": "top", "fill": "none", "expand": "False", "anchor": "center"},
-    {"side": "left", "fill": "none", "expand": "False", "anchor": "center"},
+    {"side": "top", "fill": "none", "expand": "False", "anchor": "center"},
 ]
 
-buttons: list[tk.Button] = []
+labels: list[tk.Label] = []
 
 
 def _repack() -> None:
-    """Re-pack all buttons in order using the current option values."""
-    for btn, opt in zip(buttons, options):
-        btn.pack_configure(
+    """Re-pack all labels in order using the current option values."""
+    for lbl, opt in zip(labels, options):
+        lbl.pack_configure(
             side=opt["side"],
             fill=opt["fill"],
             expand=opt["expand"] == "True",
@@ -54,8 +58,8 @@ def _make_option_row(
     key: str,
     values: list[str],
 ) -> None:
-    """Create a label + OptionMenu row controlling button *index*'s *key*."""
-    lbl = tk.Label(parent, text=label_text, anchor="e")
+    """Create a label + OptionMenu row controlling label *index*'s *key*."""
+    lbl = tk.Label(parent, text=label_text, anchor="e", font=("Helvetica", 13))
     lbl.grid(row=row, column=0, sticky="e", padx=(8, 4), pady=2)
 
     var = tk.StringVar(value=options[index][key])
@@ -86,7 +90,7 @@ controls.columnconfigure(1, weight=1)
 
 row = 0
 for i in range(3):
-    tk.Label(controls, text=f"--- button {i + 1} ---", anchor="w").grid(
+    tk.Label(controls, text=f"--- label {i + 1} ---", anchor="w", font=("Helvetica", 13, "bold")).grid(
         row=row, column=0, columnspan=2, sticky="w", pady=(8, 2)
     )
     row += 1
@@ -95,14 +99,16 @@ for i in range(3):
     _make_option_row(controls, row, "expand:", i, "expand", EXPAND_VALUES); row += 1
     _make_option_row(controls, row, "anchor:", i, "anchor", ANCHOR_VALUES); row += 1
 
-# -- Right side: preview frame with three buttons --------------------------
+# -- Right side: preview frame with three labels --------------------------
 preview = tk.Frame(root, relief="solid", borderwidth=1, bg="gray")
 preview.pack(side="left", fill="both", expand=True, padx=8, pady=8)
 
-buttons = [
-    tk.Button(preview, text="button 1", bg="#ffd0d0"),
-    tk.Button(preview, text="button 2", bg="#d0ffd0"),
-    tk.Button(preview, text="button 3", bg="#d0d0ff"),
+# macOS の Aqua テーマでは tk.Button の bg が無視されるため、
+# bg を尊重する tk.Label をターゲットに使う（色で区別を可視化）。
+labels = [
+    tk.Label(preview, text="label 1", bg="#ffd0d0", relief="solid", bd=1, padx=8, pady=4, font=("Helvetica", 16, "bold")),
+    tk.Label(preview, text="label 2", bg="#d0ffd0", relief="solid", bd=1, padx=8, pady=4, font=("Helvetica", 16, "bold")),
+    tk.Label(preview, text="label 3", bg="#d0d0ff", relief="solid", bd=1, padx=8, pady=4, font=("Helvetica", 16, "bold")),
 ]
 _repack()
 

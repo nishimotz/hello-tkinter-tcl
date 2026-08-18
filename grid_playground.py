@@ -1,9 +1,13 @@
+# /// script
+# dependencies = []
+# ///
+
 """Interactive grid options playground (pure tkinter version).
 
 Left side: option menus for grid options (row, column, sticky, columnspan,
 rowspan, padx, pady, ipadx, ipady) plus per-column and per-row weight
 controls for columnconfigure/rowconfigure.
-Right side: a 4×4 grid with a target button whose grid geometry is
+Right side: a 4×4 grid with a target label whose grid geometry is
 controlled by those options.
 
 Uses only ``tk`` widgets (no ``ttk``) so the demo stays visually consistent
@@ -47,7 +51,7 @@ state: dict[str, str] = {
 col_weights: list[str] = ["1", "1", "1", "1"]
 row_weights: list[str] = ["1", "1", "1", "1"]
 
-target_button: tk.Button | None = None
+target_label: tk.Label | None = None
 cell_labels: list[list[tk.Label]] = []  # 4×4 grid of cell labels
 
 # ---------------------------------------------------------------------------
@@ -69,7 +73,7 @@ def _highlight_occupied_cells() -> None:
             if r <= ri < r + rs and c <= ci < c + cs:
                 cell_labels[ri][ci].configure(bg="lightblue", fg="black")
             else:
-                cell_labels[ri][ci].configure(bg="white", fg="lightgray")
+                cell_labels[ri][ci].configure(bg="white", fg="#555555")
 
 
 def _apply_grid_options(
@@ -84,8 +88,8 @@ def _apply_grid_options(
     ipadx: str | None = None,
     ipady: str | None = None,
 ) -> None:
-    """Re-grid the target button using the current option values."""
-    if target_button is None:
+    """Re-grid the target label using the current option values."""
+    if target_label is None:
         return
     r = int(row if row is not None else state["row"])
     c = int(column if column is not None else state["column"])
@@ -96,7 +100,7 @@ def _apply_grid_options(
     py = int(pady if pady is not None else state["pady"])
     ipx = int(ipadx if ipadx is not None else state["ipadx"])
     ipy = int(ipady if ipady is not None else state["ipady"])
-    target_button.grid_configure(
+    target_label.grid_configure(
         row=r,
         column=c,
         sticky=s,
@@ -112,9 +116,9 @@ def _apply_grid_options(
 
 def _apply_weights() -> None:
     """Apply columnconfigure/rowconfigure weights to the preview frame."""
-    if target_button is None:
+    if target_label is None:
         return
-    parent = target_button.master
+    parent = target_label.master
     for ci, w in enumerate(col_weights):
         parent.columnconfigure(ci, weight=int(w))
     for ri, w in enumerate(row_weights):
@@ -129,7 +133,7 @@ def _make_weight_row(
     weight_list: list[str],
 ) -> None:
     """Create a label + OptionMenu row for a single column/row weight."""
-    lbl = tk.Label(parent, text=label_text, anchor="e")
+    lbl = tk.Label(parent, text=label_text, anchor="e", font=("Helvetica", 13))
     lbl.grid(row=row, column=0, sticky="e", padx=(8, 4), pady=2)
 
     var = tk.StringVar(value=weight_list[index])
@@ -156,7 +160,7 @@ def _make_option_row(
     key: str,
 ) -> None:
     """Create a label + OptionMenu row in *parent* at grid *row*."""
-    lbl = tk.Label(parent, text=label_text, anchor="e")
+    lbl = tk.Label(parent, text=label_text, anchor="e", font=("Helvetica", 13))
     lbl.grid(row=row, column=0, sticky="e", padx=(8, 4), pady=4)
 
     var = tk.StringVar(value=state[key])
@@ -205,7 +209,7 @@ _make_option_row(grid_frame, 7, "ipadx:", PAD_VALUES, "ipadx")
 _make_option_row(grid_frame, 8, "ipady:", PAD_VALUES, "ipady")
 
 # -- Column weight controls ------------------------------------------------
-tk.Label(grid_frame, text="--- col weight ---", anchor="w").grid(
+tk.Label(grid_frame, text="--- col weight ---", anchor="w", font=("Helvetica", 13, "bold")).grid(
     row=9, column=0, columnspan=2, sticky="w", padx=8, pady=(8, 2)
 )
 _make_weight_row(grid_frame, 10, "col 0:", 0, col_weights)
@@ -214,7 +218,7 @@ _make_weight_row(grid_frame, 12, "col 2:", 2, col_weights)
 _make_weight_row(grid_frame, 13, "col 3:", 3, col_weights)
 
 # -- Row weight controls ---------------------------------------------------
-tk.Label(grid_frame, text="--- row weight ---", anchor="w").grid(
+tk.Label(grid_frame, text="--- row weight ---", anchor="w", font=("Helvetica", 13, "bold")).grid(
     row=14, column=0, columnspan=2, sticky="w", padx=8, pady=(8, 2)
 )
 _make_weight_row(grid_frame, 15, "row 0:", 0, row_weights)
@@ -243,22 +247,29 @@ for r in range(4):
             relief="solid",
             borderwidth=1,
             bg="white",
-            fg="lightgray",
+            fg="#555555",
             anchor="nw",
+            font=("Helvetica", 13),
         )
         cell.grid(row=r, column=c, sticky="nsew")
         row_labels.append(cell)
     cell_labels.append(row_labels)
 
-# Target button (placed after cell labels so it renders on top)
-target_button = tk.Button(
+# Target label (placed after cell labels so it renders on top)
+# macOS の Aqua テーマでは tk.Button の bg が無視されるため、
+# bg を尊重する tk.Label をターゲットに使う。
+# セルのハイライト（lightblue）と区別するため、オレンジ系の色にする。
+target_label = tk.Label(
     target_frame,
     text="target",
     relief="solid",
     bd=2,
-    bg="lightblue",
+    bg="#ffa726",
+    padx=8,
+    pady=4,
+    font=("Helvetica", 16, "bold"),
 )
-target_button.grid(row=0, column=0)
+target_label.grid(row=0, column=0)
 _apply_grid_options()
 
 # ---------------------------------------------------------------------------

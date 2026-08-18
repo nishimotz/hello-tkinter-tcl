@@ -565,13 +565,16 @@ uv run --extra pandastable -- python pandastable_playground.py
 - [Tkinter と Python 定番ライブラリの連携ガイド](docs/popular-libraries-integration-guide.md)
   - 定番ライブラリ（Matplotlib, Pillow, pandastable, OpenCV, python-vlc 等）との連携まとめ
   - デモ: [`pandastable_playground.py`](pandastable_playground.py) — Pandas DataFrame の表表示・操作デモ
-- [Tkinter と Matplotlib 連携完全ガイド](docs/matplotlib-integration-guide.md)
+- [Tkinter と Matplotlib 連携ガイド](docs/matplotlib-integration-guide.md)
   - デモ: [`matplotlib_tk_playground.py`](matplotlib_tk_playground.py) — 信号波形・周波数・ノイズを GUI で対話的にプロット・更新
-- [Tcl/Tk における画像の使い方完全ガイド](docs/image-handling-guide.md)
+- [Tcl/Tk における画像の使い方ガイド](docs/image-handling-guide.md)
   - デモ: [`image_playground.py`](image_playground.py) — Label/Button/Canvas/Resize/Transparent/SVG を対話的に試せます
 - [Python bundled Tcl/Tk version history and tkinter feature changes](docs/python-tkinter-tcltk-version-history.md)
-- [Tcl/Tk ジオメトリマネージャー完全ガイド](docs/geometry-managers.md)
-- [Flutter 開発者のための Tcl/Tk 完全ガイド](docs/flutter-guide.md)
+- [Tcl/Tk ジオメトリマネージャーガイド](docs/geometry-managers.md)
+- [Tcl/Tk テーマとスタイルガイド](docs/theming-guide.md)
+  - tk と ttk の違い、`style.configure` / `style.map`、プラットフォーム別のテーマ制約
+  - デモ: [`theme_playground.py`](theme_playground.py) — tk.Button と ttk.Button の色の挙動をテーマ切り替えで比較
+- [Flutter 開発者のための Tcl/Tk ガイド](docs/flutter-guide.md)
 - Tcl Developer Site: https://www.tcl.tk/
 - Python tkinter docs: https://docs.python.org/3/library/tkinter.html
 - Tcl 8.6 OO: https://www.tcl.tk/man/tcl8.6/TclCmd/define.htm

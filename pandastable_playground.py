@@ -1,3 +1,10 @@
+# /// script
+# dependencies = [
+#     "pandastable>=0.13.1",
+#     "pandas>=2.0",
+# ]
+# ///
+
 """Simple Pandastable & Tkinter Integration Example.
 
 Demonstrates how to embed a Pandas DataFrame into a Tkinter window using 'pandastable'.

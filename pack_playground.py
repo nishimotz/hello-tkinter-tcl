@@ -1,3 +1,7 @@
+# /// script
+# dependencies = []
+# ///
+
 """Interactive pack options playground (pure tkinter version).
 
 Left side: eight option menus to choose pack options (side, fill, expand,
@@ -43,7 +47,8 @@ state: dict[str, str] = {
     "ipady": "0",
 }
 
-target_button: tk.Button | None = None
+target_label: tk.Label | None = None
+status_label: tk.Label | None = None
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -60,8 +65,8 @@ def _apply_pack_options(
     ipadx: str | None = None,
     ipady: str | None = None,
 ) -> None:
-    """Re-pack the target button using the current combobox values."""
-    if target_button is None:
+    """Re-pack the target label using the current combobox values."""
+    if target_label is None:
         return
     s = side if side is not None else state["side"]
     f = fill if fill is not None else state["fill"]
@@ -71,10 +76,17 @@ def _apply_pack_options(
     py = int(pady if pady is not None else state["pady"])
     ipx = int(ipadx if ipadx is not None else state["ipadx"])
     ipy = int(ipady if ipady is not None else state["ipady"])
-    target_button.pack_configure(
+    target_label.pack_configure(
         side=s, fill=f, expand=e, anchor=a,
         padx=px, pady=py, ipadx=ipx, ipady=ipy,
     )
+    if status_label is not None:
+        status_label.config(
+            text=(
+                f"side={s}  fill={f}  expand={e}  anchor={a}\n"
+                f"padx={px}  pady={py}  ipadx={ipx}  ipady={ipy}"
+            )
+        )
 
 
 def _make_option_row(
@@ -85,7 +97,7 @@ def _make_option_row(
     key: str,
 ) -> None:
     """Create a label + OptionMenu row in *parent* at grid *row*."""
-    lbl = tk.Label(parent, text=label_text, anchor="e")
+    lbl = tk.Label(parent, text=label_text, anchor="e", font=("Helvetica", 13))
     lbl.grid(row=row, column=0, sticky="e", padx=(8, 4), pady=4)
 
     var = tk.StringVar(value=state[key])
@@ -127,19 +139,39 @@ _make_option_row(grid_frame, 5, "pady:", PAD_VALUES, "pady")
 _make_option_row(grid_frame, 6, "ipadx:", PAD_VALUES, "ipadx")
 _make_option_row(grid_frame, 7, "ipady:", PAD_VALUES, "ipady")
 
-# -- Right side: preview frame + target button -----------------------------
+# -- Right side: preview frame + target label -----------------------------
 target_frame = tk.Frame(grid_frame, relief="solid", borderwidth=1, bg="gray")
 target_frame.grid(row=0, column=2, rowspan=8, sticky="nsew", padx=8, pady=8)
 target_frame.columnconfigure(0, weight=1)
 target_frame.rowconfigure(0, weight=1)
 
-target_button = tk.Button(
+# macOS の Aqua テーマでは tk.Button の bg が無視されるため、
+# bg を尊重する tk.Label をターゲットに使う（ipadx/ipady の可視化用）。
+target_label = tk.Label(
     target_frame,
-    text="target button",
+    text="target widget",
     relief="solid",
     bd=1,
+    bg="#ffd54f",   # 目立つ背景色で ipadx/ipady の内部パディングを可視化
+    width=14,       # 最小サイズを確保し、初期状態でも黄色背景が見えるように
+    height=2,
+    font=("Helvetica", 16, "bold"),
 )
-target_button.pack()
+target_label.pack()
+_apply_pack_options()
+
+# -- Status bar: 現在の pack オプションを常時表示 ---------------------------
+status_label = tk.Label(
+    root,
+    text="",
+    justify="left",
+    anchor="w",
+    relief="sunken",
+    bd=1,
+    padx=6,
+    pady=4,
+)
+status_label.pack(fill="x", side="bottom")
 _apply_pack_options()
 
 # ---------------------------------------------------------------------------

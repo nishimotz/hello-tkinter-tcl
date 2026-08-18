@@ -12,7 +12,7 @@ Python 標準の GUI ツールキットである `tkinter` は、データ分析
 
 Matplotlib の `FigureCanvasTkAgg` ブリッジを使用することで、GUI 内にインタラクティブなグラフを埋め込むことができます。
 
-* 📄 **詳細ガイド**: [Tkinter と Matplotlib 連携完全ガイド](matplotlib-integration-guide.md)
+* 📄 **詳細ガイド**: [Tkinter と Matplotlib 連携ガイド](matplotlib-integration-guide.md)
 * 💻 **デモスクリプト**: `matplotlib_tk_playground.py`
 * **実行方法**:
   ```bash
@@ -25,7 +25,7 @@ Matplotlib の `FigureCanvasTkAgg` ブリッジを使用することで、GUI �
 
 Pillow の `PIL.ImageTk.PhotoImage` モジュールを使うことで、PNG, JPEG, WEBP などの画像を Tkinter ウィジェットにシームレスに表示・加工できます。
 
-* 📄 **詳細ガイド**: [Tcl/Tk における画像の使い方完全ガイド](image-handling-guide.md)
+* 📄 **詳細ガイド**: [Tcl/Tk における画像の使い方ガイド](image-handling-guide.md)
 * 💻 **デモスクリプト**: `image_playground.py`
 * **実行方法**:
   ```bash
