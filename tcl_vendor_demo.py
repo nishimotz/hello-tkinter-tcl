@@ -4,13 +4,21 @@
 
 """Tcl パッケージ（demobox）を vendoring して使うデモ（純 tkinter 版）。
 
-nextpytk を使わず、素の tkinter だけで「Tcl エコシステムの拡張を
-vendoring して使う」仕組みを示す。
+素の tkinter だけで「Tcl エコシステムの拡張を vendoring して使う」
+仕組みを示す。
 
 1. **拡張性**: リポジトリ内の ``vendor/demobox`` に置いた Tcl パッケージを
    ``package require demobox`` で読み込み、tkinter の Canvas ウィジェットに
    アニメーション機能を追加する。素の tkinter には無い機能を、
    Tcl エコシステムのパッケージ流通（pkgIndex.tcl + .tm）で補っている。
+
+   - ``pkgIndex.tcl`` 経由のパッケージ方式: auto_path に追加したディレクトリの
+     pkgIndex.tcl が ``package ifneeded demobox 1.0`` でロード方法を提供する。
+   - 実は ``.tm`` モジュール単体でも動く: ファイル名の命名規則
+     ``<name>-<version>.tm``（ここでは demobox-1.0.tm）に従っていれば、
+     ``::tcl::tm::path`` にディレクトリを追加するだけで ``package require``
+     が解決できる。pkgIndex.tcl は「パッケージ」として配布する際の
+     索引であり、必須ではない。
 
 2. **性能改善**: アニメーションループは ``demobox`` 内部の Tcl ``after``
    で回す。Python のイベントループをブロックせず、canvas アニメも
@@ -110,8 +118,12 @@ def _speed() -> None:
 
 if __name__ == "__main__":
     # vendored パッケージを auto_path に追加して require する。
+    # ここは pkgIndex.tcl 経由（パッケージ）の読み込み。
     root.tk.eval(f"lappend auto_path {{{_VENDOR}}}")
     root.tk.eval("package require demobox")
+    # モジュール（.tm）だけで動かすなら、pkgIndex.tcl は不要で下記で足りる:
+    #   root.tk.eval(f"lappend ::tcl::tm::path {{{_VENDOR}}}")
+    #   root.tk.eval("package require demobox")
     root.lift()
     root.focus_force()
     root.mainloop()
