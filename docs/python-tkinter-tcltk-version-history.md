@@ -195,7 +195,7 @@ print(tkinter.Tcl().eval('info patchlevel'))
 - **Tcl における Unicode 正規化** サポート。
 - **モノトニックタイマー** サポート。
 - **`lfilter`**: リストフィルタリングコマンド。
-- **`vsapi` toggleswitch**: 新しいテーマウィジェット機能。
+- **`ttk::toggleswitch`**: Tk 9.1 から追加された新しいテーマウィジェット（ON/OFF トグルスイッチ）。
 - **アクセシビリティ / スクリーンリーダー** 改善。
 - **RTL / bidi テキスト** サポート。
 - **`tk attribtable`**: より豊かな属性イントロスペクション。
@@ -312,6 +312,7 @@ print(tkinter.Tcl().eval('info patchlevel'))
 | `wm_attributes -appearance`（Windows/macOS）、`-class`/`-stylemask`/`-tabbingid`/`-tabbingmode`（macOS） | Tk 9.0+ | |
 | `tk busy`（busy ウィンドウ状態） | Tk 8.6+ | Python 3.13 で `tk_busy_*` として公開 |
 | `tk fontchooser` | Tk 8.6+ | |
+| `ttk::toggleswitch` / `tkinter.ttk.ToggleSwitch` | Tk 9.1+ | Tcl/Tk 9.1 で追加されたテーマウィジェット。現行 CPython 公式バイナリ（3.15/3.16）では未同梱 |
 | `Text` タグオプション `lmargincolor`, `overstrikefg`, `rmargincolor`, `selectbackground`, `selectforeground`, `underlinefg` | Tk 8.6+ | |
 
 出典:
