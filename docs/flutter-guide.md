@@ -95,7 +95,7 @@ Flutter のレイアウト用 Widget と Tk のジオメトリマネージャー
 | `Padding` | `-padx`, `-pady` | 外側パディング（周囲の余白） |
 | `Container` (margin/padding) | `-ipadx`, `-ipady` | 内側パディング（内部要素と枠の余白） |
 | `Align` / `Center` | `-anchor` / `-sticky` | 割り当て領域内での寄せる方向 (`n`, `s`, `e`, `w`, `center` 等) |
-| `Expanded` / `Flexible` | `pack -fill -expand` / `grid configure -weight` | 余剰スペースの自動伸縮指定。`Expanded` は flex factor で分配、`pack -expand` は cavity への埋め込み |
+| `Expanded` / `Flexible` | `pack -fill -expand` / `grid configure -weight` | 余剰スペースの自動伸縮指定。`Expanded` は flex factor（例: 2:1）で比例分配、`pack -expand` は cavity 余白を expand 子で均等分配（重みなし）、`grid -weight` は比例配分 |
 | `SizedBox` / `Container` | `frame` / `-width` `-height` | サイズ固定の領域や背景枠 |
 
 ---
@@ -182,7 +182,12 @@ pack .b -side left   → 残り cavity の左辺から .b の幅だけ削る
 3. **`expand` は cavity への埋め込み、Flutter の `Expanded` は flex factor による分配**
    - 外見は似ていますが、`pack -expand` は残り cavity を均等に分配するものであり、Flutter の `Expanded` は子に flex factor を与えて余剰スペースを比例配分するものです。
 
-4. **同一親内で pack と grid を混ぜられない**
+4. **`pack -expand` に factor（重み）はない**
+   - `pack -expand 1`、`pack -expand 2`、`pack -expand yes` は内部的に同じ真偽値 true として扱われる。
+   - 余剰スペースは `expand=True` の子全員で**均等**に分配される。
+   - 2:1 のような比例配分が必要なら `grid` と `-weight` を使う。
+
+5. **同一親内で pack と grid を混ぜられない**
    - cavity モデルは `pack` 専用です。`grid` は全く別の配置マネージャーで、同じ親フレーム内では共存できません。
 
 ### 比較まとめ
